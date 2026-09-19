@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>SmileyFaceAI</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: #0b0b0c;
+            color: #f5f5f5;
+
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .chat {
+            width: 92%;
+            max-width: 760px;
+            height: 86vh;
+
+            background: #151516;
+            border: 1px solid #29292b;
+            border-radius: 24px;
+
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+        }
+
+        .header {
+            padding: 22px;
+            text-align: center;
+            background: #181819;
+            border-bottom: 1px solid #29292b;
+
+            font-size: 22px;
+            font-weight: 600;
+        }
+
+        .messages {
+            flex: 1;
+            padding: 24px;
+            overflow-y: auto;
+        }
+
+        .message {
+            padding: 14px 18px;
+            margin-bottom: 14px;
+            border-radius: 18px;
+            max-width: 75%;
+            line-height: 1.5;
+            white-space: pre-wrap;
+        }
+
+        .ai {
+            background: #242426;
+            border: 1px solid #303033;
+        }
+
+        .user {
+            background: #f1f1f1;
+            color: #111111;
+            margin-left: auto;
+        }
+
+        .input-area {
+            padding: 16px;
+            background: #181819;
+            border-top: 1px solid #29292b;
+
+            display: flex;
+            gap: 10px;
+        }
+
+        input {
+            flex: 1;
+            padding: 15px 17px;
+
+            background: #242426;
+            color: white;
+
+            border: 1px solid #333336;
+            border-radius: 15px;
+
+            outline: none;
+            font-size: 16px;
+        }
+
+        button {
+            padding: 0 20px;
+
+            background: #f1f1f1;
+            color: #111111;
+
+            border: none;
+            border-radius: 15px;
+
+            font-size: 15px;
+            font-weight: 600;
+
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #dcdcdc;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="chat">
+
+        <div class="header">
+            SmileyFaceAI
+        </div>
+
+        <div class="messages" id="messages">
+
+            <div class="message ai">
+                Hallo! 👋 Ich bin SmileyFaceAI.
+            </div>
+
+        </div>
+
+        <div class="input-area">
+
+            <input
+                id="messageInput"
+                type="text"
+                placeholder="Nachricht schreiben..."
+                onkeydown="handleEnter(event)"
+            >
+
+            <button id="sendButton" onclick="sendMessage()">
+                Senden
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <script>
+
+        async function sendMessage() {
+
+            const input = document.getElementById("messageInput");
+            const messages = document.getElementById("messages");
+            const button = document.getElementById("sendButton");
+
+            const text = input.value.trim();
+
+            if (text === "") {
+                return;
+            }
+
+
+            // Nachricht des Benutzers anzeigen
+
+            const userMessage = document.createElement("div");
+
+            userMessage.className = "message user";
+            userMessage.textContent = text;
+
+            messages.appendChild(userMessage);
+
+            input.value = "";
+
+            messages.scrollTop = messages.scrollHeight;
+
+
+            // Button während der Anfrage deaktivieren
+
+            button.disabled = true;
+            button.textContent = "...";
+
+
+            // Lade-Nachricht der KI
+
+            const aiMessage = document.createElement("div");
+
+            aiMessage.className = "message ai";
+            aiMessage.textContent = "SmileyFaceAI denkt nach...";
+
+            messages.appendChild(aiMessage);
+
+            messages.scrollTop = messages.scrollHeight;
+
+
+            try {
+
+                // Nachricht an unseren eigenen Server senden
+
+                const response = await fetch("/api/chat", {
+
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+
+                    body: JSON.stringify({
+                        message: text
+                    })
+
+                });
+
+
+                const data = await response.json();
+
+
+                // Echte Antwort der KI anzeigen
+
+                aiMessage.textContent = data.reply;
+
+            } catch (error) {
+
+                console.error(error);
+
+                aiMessage.textContent =
+                    "Entschuldigung 😕 Es ist ein Fehler aufgetreten.";
+
+            }
+
+
+            // Button wieder aktivieren
+
+            button.disabled = false;
+            button.textContent = "Senden";
+
+            input.focus();
+
+            messages.scrollTop = messages.scrollHeight;
+        }
+
+
+        function handleEnter(event) {
+
+            if (event.key === "Enter") {
+                sendMessage();
+            }
+
+        }
+
+    </script>
+
+</body>
+</html>
