@@ -6,7 +6,6 @@ const client = new OpenAI();
 
 const server = http.createServer(async (req, res) => {
 
-    // Unsere Webseite anzeigen
     if (req.method === "GET" && req.url === "/") {
 
         fs.readFile("index.html", "utf8", (err, data) => {
@@ -30,8 +29,6 @@ const server = http.createServer(async (req, res) => {
         return;
     }
 
-
-    // Nachricht an die KI
     if (req.method === "POST" && req.url === "/api/chat") {
 
         let body = "";
@@ -82,8 +79,6 @@ const server = http.createServer(async (req, res) => {
         return;
     }
 
-
-    // Alles andere
     res.writeHead(404, {
         "Content-Type": "text/plain; charset=utf-8"
     });
@@ -92,8 +87,8 @@ const server = http.createServer(async (req, res) => {
 });
 
 
-server.listen(3000, "127.0.0.1", () => {
+const port = process.env.PORT || 3000;
 
-    console.log("SmileyFaceAI läuft auf http://127.0.0.1:3000");
-
+server.listen(port, "0.0.0.0", () => {
+    console.log(`SmileyFaceAI läuft auf Port ${port}`);
 });
